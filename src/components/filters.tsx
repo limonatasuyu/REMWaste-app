@@ -1,5 +1,7 @@
 import { useState } from "react";
 import type { IFilters, IFilterOptions } from "../types.ts";
+import { useFilterValidation } from "../hooks/use-filter-validation.ts";
+import { SelectInput } from "./select-input.tsx";
 
 export function Filters({
   filterOptions,
@@ -15,33 +17,7 @@ export function Filters({
   clearFilters: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [errors, setErrors] = useState<{ minPrice?: string; maxPrice?: string }>({});
-
-  function validate() {
-    const newErrors: typeof errors = {};
-
-    if (filters.minPrice !== "" && (isNaN(Number(filters.minPrice)) || Number(filters.minPrice) < 0)) {
-      newErrors.minPrice = "Min Price must be a positive number";
-    }
-
-    if (filters.maxPrice !== "" && (isNaN(Number(filters.maxPrice)) || Number(filters.maxPrice) < 0)) {
-      newErrors.maxPrice = "Max Price must be a positive number";
-    }
-
-    if (
-      filters.minPrice !== "" &&
-      filters.maxPrice !== "" &&
-      !newErrors.minPrice &&
-      !newErrors.maxPrice &&
-      Number(filters.minPrice) > Number(filters.maxPrice)
-    ) {
-      newErrors.minPrice = "Min Price cannot be greater than Max Price";
-      newErrors.maxPrice = "Max Price cannot be less than Min Price";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }
+  const { errors, validate } = useFilterValidation({ filters });
 
   function handleApply() {
     if (validate()) {
@@ -51,11 +27,12 @@ export function Filters({
   }
 
   return (
-    <div className="relative">
+    <div className="relative" aria-label="Filter Controls">
       <div className="flex">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-xl shadow hover:bg-blue-700 transition-colors"
+          aria-controls="filter-drawer"
         >
           {isOpen ? "Close Filters" : "Open Filters"}
         </button>
@@ -63,39 +40,36 @@ export function Filters({
           onClick={clearFilters}
           disabled={!filters.set}
           className={`ml-4 mb-4 px-4 py-2 text-white rounded-xl shadow transition-colors ${
-            filters.set ? "bg-blue-600  hover:bg-blue-700" : "bg-gray-300 cursor-not-allowed"
+            filters.set ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-300 cursor-not-allowed"
           }`}
+          aria-label="Clear All Filters"
         >
           Clear Filters
         </button>
       </div>
+
       {/* Drawer */}
       <div
+        id="filter-drawer"
+        role="dialog"
+        aria-labelledby="filter-heading"
+        aria-modal="true"
         className={`max-w-screen fixed top-0 left-0 h-full w-xl bg-white shadow-xl p-6 space-y-6 transform transition-transform duration-300 ease-in-out z-50
-    ${isOpen ? "translate-x-0" : "-translate-x-full"}
-  `}
+        ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         <h2 className="text-xl font-semibold text-gray-800 mb-4">Filter Options</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Size Filter */}
-          <div className="flex flex-col">
-            <label htmlFor="size-filter" className="text-sm font-medium text-gray-700 mb-1">
-              Size
-            </label>
-            <select
-              id="size-filter"
-              value={filters.size}
-              onChange={(e) => setFilters({ ...filters, size: e.target.value })}
-              className="rounded-xl border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">All Sizes</option>
-              {filterOptions.sizes.map((size) => (
-                <option key={size} value={size}>
-                  {size} Yard
-                </option>
-              ))}
-            </select>
-          </div>
+          <SelectInput
+            id="size-filter"
+            label="Size"
+            value={filters.size}
+            onChange={(value) => setFilters({ ...filters, size: value })}
+            options={[
+              { value: "", label: "All Sizes" },
+              ...filterOptions.sizes.map((size) => ({ value: String(size), label: `${size} Yard` })),
+            ]}
+          />
 
           {/* Min Price Filter */}
           <div className="flex flex-col">
@@ -116,7 +90,7 @@ export function Filters({
             {errors.minPrice && <p className="text-red-500 text-xs mt-1">{errors.minPrice}</p>}
           </div>
 
-          {/* Max Price Filter */}
+          {/* Max Price Filter*/}
           <div className="flex flex-col">
             <label htmlFor="max-price-filter" className="text-sm font-medium text-gray-700 mb-1">
               Max Price (before VAT)
@@ -136,52 +110,42 @@ export function Filters({
           </div>
 
           {/* Hire Period Filter */}
-          <div className="flex flex-col">
-            <label htmlFor="hire-filter" className="text-sm font-medium text-gray-700 mb-1">
-              Hire Period
-            </label>
-            <select
-              id="hire-filter"
-              value={filters.hirePeriod}
-              onChange={(e) => setFilters({ ...filters, hirePeriod: e.target.value })}
-              className="rounded-xl border border-gray-300 px-3 py-2 shadow-sm focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">All Periods</option>
-              {filterOptions.hirePeriods.map((days) => (
-                <option key={days} value={days}>
-                  {days} Days
-                </option>
-              ))}
-            </select>
-          </div>
+          <SelectInput
+            id="hire-filter"
+            label="Hire Period"
+            value={filters.hirePeriod}
+            onChange={(value) => setFilters({ ...filters, hirePeriod: value })}
+            options={[
+              { value: "", label: "All Periods" },
+              ...filterOptions.hirePeriods.map((days) => ({ value: String(days), label: `${days} Days` })),
+            ]}
+          />
 
           {/* Allowed on Road Filter */}
-          <div className="flex items-center space-x-3 mt-1">
-            <input
-              id="road-filter"
-              type="checkbox"
-              checked={filters.allowedOnRoad}
-              onChange={(e) => setFilters({ ...filters, allowedOnRoad: e.target.checked })}
-              className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-            />
-            <label htmlFor="road-filter" className="text-sm text-gray-700">
-              Allowed on Road
-            </label>
-          </div>
+          <SelectInput
+            id="road-filter"
+            label="Allowed On Road"
+            value={filters.allowedOnRoad}
+            onChange={(value) => setFilters({ ...filters, allowedOnRoad: value as "" | "yes" | "no" })}
+            options={[
+              { value: "", label: "All Options" },
+              { value: "yes", label: "Yes" },
+              { value: "no", label: "No" },
+            ]}
+          />
 
           {/* Allows Heavy Waste Filter */}
-          <div className="flex items-center space-x-3 mt-1">
-            <input
-              id="heavy-filter"
-              type="checkbox"
-              checked={filters.allowsHeavyWaste}
-              onChange={(e) => setFilters({ ...filters, allowsHeavyWaste: e.target.checked })}
-              className="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-            />
-            <label htmlFor="heavy-filter" className="text-sm text-gray-700">
-              Allows Heavy Waste
-            </label>
-          </div>
+          <SelectInput
+            id="waste-filter"
+            label="Allowed Heavy Waste"
+            value={filters.allowsHeavyWaste}
+            onChange={(value) => setFilters({ ...filters, allowsHeavyWaste: value as "" | "yes" | "no" })}
+            options={[
+              { value: "", label: "All Options" },
+              { value: "yes", label: "Yes" },
+              { value: "no", label: "No" },
+            ]}
+          />
         </div>
 
         {/* Apply Button */}

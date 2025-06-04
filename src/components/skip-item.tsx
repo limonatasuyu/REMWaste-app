@@ -11,42 +11,49 @@ export function SkipItem({
   item: ISkipData;
 }) {
   const isSelected = selectedItem?.id === item.id;
+  const skipSize = `${item.size} yard skip`;
 
   return (
     <li
       role="option"
       aria-selected={isSelected}
-      key={item.id}
       tabIndex={0}
       className={`group relative flex flex-col p-6 rounded-2xl bg-white border shadow-sm transition-all duration-300 focus-within:ring-4 focus-within:ring-blue-500 hover:shadow-lg hover:scale-[1.02] ${
         isSelected ? "ring-2 ring-blue-600 border-blue-300" : "border-gray-200"
       }`}
+      aria-label={`${skipSize}. Price: £${item.price_before_vat} plus VAT. Hire period: ${item.hire_period_days} days${
+        !item.allowed_on_road ? '. Not allowed on road' : ''
+      }${!item.allows_heavy_waste ? '. Does not allow heavy waste' : ''}`}
     >
       <div className="flex flex-col items-center gap-4 h-full">
         {/* Image */}
-        <div className="w-full max-w-sm aspect-[4/3] overflow-hidden rounded-xl shadow-md">
+        <div 
+          className="w-full max-w-sm aspect-[4/3] overflow-hidden rounded-xl shadow-md"
+          role="img"
+          aria-label={skipSize}
+        >
           <img
             src={getSkipItemImage(item.size)}
-            alt={`${item.size}-yard skip`}
+            alt=""  // Moving description to parent div
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </div>
 
         {/* Info */}
         <div className="text-center w-full space-y-1">
-          <h3 className="text-2xl font-bold text-gray-900">{item.size} Yard Skip</h3>
+          <h3 className="text-2xl font-bold text-gray-900" id={`skip-${item.id}-title`}>{skipSize}</h3>
           <p className="text-sm text-gray-600">
             Hire period: <span className="font-medium text-gray-800">{item.hire_period_days} days</span>
           </p>
-          <p className="text-lg font-semibold text-gray-800 mt-1">
+          <p className="text-lg font-semibold text-gray-800 mt-1" aria-label={`Price: £${item.price_before_vat} plus VAT of £${item.vat}`}>
             £{item.price_before_vat} + VAT <span className="text-sm text-gray-500">(£{item.vat})</span>
           </p>
         </div>
 
         {/* Warnings */}
-        <div className="flex flex-col items-center gap-1 text-sm mt-2 text-red-500">
-          {!item.allowed_on_road && <span>⚠️ Not allowed on road</span>}
-          {!item.allows_heavy_waste && <span>⚠️ Does not allow heavy waste</span>}
+        <div className="flex flex-col items-center gap-1 text-sm mt-2 text-red-500" role="alert">
+          {!item.allowed_on_road && <span aria-label="Warning: Not allowed on road">⚠️ Not allowed on road</span>}
+          {!item.allows_heavy_waste && <span aria-label="Warning: Does not allow heavy waste">⚠️ Does not allow heavy waste</span>}
         </div>
 
         {/* Button */}
@@ -58,7 +65,7 @@ export function SkipItem({
               : "bg-blue-500 hover:bg-blue-600 text-white"
           }`}
           aria-pressed={isSelected}
-          aria-label={`Select ${item.size} yard skip`}
+          aria-describedby={`skip-${item.id}-title`}
         >
           {isSelected ? "✓ Selected" : "Select"}
         </button>

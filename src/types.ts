@@ -3,8 +3,8 @@ export interface IFilters {
   hirePeriod: string;
   maxPrice: string;
   minPrice: string;
-  allowedOnRoad: boolean;
-  allowsHeavyWaste: boolean;
+  allowedOnRoad: "yes" | "no" | "";
+  allowsHeavyWaste: "yes" | "no" | "";
   set: boolean;
 }
 
