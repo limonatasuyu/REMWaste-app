@@ -19,9 +19,9 @@ export function useFilters({ data }: { data: ISkipData[] }) {
         filters.hirePeriod === "" || skip.hire_period_days === Number(filters.hirePeriod);
       const sizeMatches = filters.size === "" || skip.size === Number(filters.size);
       const allowedOnRoadMatches =
-        (filters.allowedOnRoad === "yes" && skip.allowed_on_road) || filters.allowedOnRoad === "";
+        (filters.allowedOnRoad === "yes" && skip.allowed_on_road) || (filters.allowedOnRoad === "no" && !skip.allowed_on_road) || filters.allowedOnRoad === "";
       const allowsHeavyWasteMatches =
-        (filters.allowsHeavyWaste === "yes" && skip.allows_heavy_waste) || filters.allowsHeavyWaste === "";
+        (filters.allowsHeavyWaste === "yes" && skip.allows_heavy_waste) || (filters.allowsHeavyWaste === "no" && !skip.allows_heavy_waste) || filters.allowsHeavyWaste === "";
       const price = skip.price_before_vat + skip.vat;
       const priceMatches =
         (filters.maxPrice === "" || price <= Number(filters.maxPrice)) &&
