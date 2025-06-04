@@ -12,7 +12,7 @@ export function SkipContinueBar({
 }) {
   return (
     <div
-      className="fixed bottom-0 left-0 sm:w-full w-[90%] bg-white border-t border-gray-200 z-50 shadow-md"
+      className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 z-50 shadow-md"
       role="region"
       aria-labelledby="selected-skip-heading"
     >
