@@ -1,19 +1,16 @@
 import { useRef } from "react";
-import type { ISkipData } from "../types";
 import { getSkipItemImage } from "../utils";
 import { useConfetti } from "../hooks/use-confetti";
+import { useSelectedItem } from "../context/selected-item-context";
 
-export function SelectedItemPage({ item }: { item: ISkipData | null }) {
+export function SelectedItemPage() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { selectedItem: item } = useSelectedItem();
   useConfetti({ canvasRef, item });
 
   if (!item) {
     return (
-      <div 
-        className="text-center py-20 text-gray-500" 
-        role="alert" 
-        aria-label="No item selected"
-      >
+      <div className="text-center py-20 text-gray-500" role="alert" aria-label="No item selected">
         No item selected
       </div>
     );
@@ -21,13 +18,9 @@ export function SelectedItemPage({ item }: { item: ISkipData | null }) {
 
   return (
     <main className="w-screen h-screen flex items-center justify-center">
-      <canvas 
-        ref={canvasRef} 
-        className="fixed inset-0 pointer-events-none z-50"
-        aria-hidden="true" 
-      />
+      <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-50" aria-hidden="true" />
 
-      <article 
+      <article
         className="relative z-10 bg-white group p-6 rounded-2xl border shadow-sm transition-all duration-300 hover:shadow-lg hover:scale-105 max-w-sm w-full"
         aria-labelledby="skip-title"
       >
@@ -49,25 +42,19 @@ export function SelectedItemPage({ item }: { item: ISkipData | null }) {
               <span className="font-medium text-gray-800">{item.hire_period_days} days</span>
             </p>
             <p className="text-lg font-semibold text-gray-800 mt-1">
-              <span className="sr-only">Price: </span>
-              £{item.price_before_vat} + VAT <span className="text-sm text-gray-500">(£{item.vat})</span>
+              <span className="sr-only">Price: </span>£{item.price_before_vat} + VAT{" "}
+              <span className="text-sm text-gray-500">(£{item.vat})</span>
             </p>
           </div>
 
-          <div 
+          <div
             className="flex flex-col items-center gap-1 text-sm mt-2 text-red-500"
             role="alert"
             aria-label="Usage restrictions"
           >
-            {!item.allowed_on_road && (
-              <p aria-label="Warning: Not allowed on road">
-                ⚠️ Not allowed on road
-              </p>
-            )}
+            {!item.allowed_on_road && <p aria-label="Warning: Not allowed on road">⚠️ Not allowed on road</p>}
             {!item.allows_heavy_waste && (
-              <p aria-label="Warning: Does not allow heavy waste">
-                ⚠️ Does not allow heavy waste
-              </p>
+              <p aria-label="Warning: Does not allow heavy waste">⚠️ Does not allow heavy waste</p>
             )}
           </div>
         </div>

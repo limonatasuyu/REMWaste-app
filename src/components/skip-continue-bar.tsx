@@ -1,17 +1,15 @@
-import type { ISkipData } from "../types";
+import { useSelectedItem } from "../context/selected-item-context";
 import { getSkipItemImage } from "../utils";
 
 type SkipContinueBarProps = {
-  selectedItem: ISkipData;
-  handleDeselect: () => void;
   setIsSelectedItemPage: (is: boolean) => void;
 };
 
-export function SkipContinueBar({
-  selectedItem,
-  handleDeselect,
-  setIsSelectedItemPage,
-}: SkipContinueBarProps) {
+export function SkipContinueBar({ setIsSelectedItemPage }: SkipContinueBarProps) {
+  const { selectedItem, setSelectedItem } = useSelectedItem();
+  if (!selectedItem) {
+    return null;
+  }
   const totalPrice = selectedItem.price_before_vat + selectedItem.vat;
 
   return (
@@ -37,7 +35,7 @@ export function SkipContinueBar({
               Hire period:{" "}
               <span className="font-medium text-gray-800">{selectedItem.hire_period_days} days</span>
             </p>
-            <div 
+            <div
               className="text-base font-semibold text-gray-800"
               aria-label={`Total price: £${totalPrice} including VAT of £${selectedItem.vat}`}
             >
@@ -49,13 +47,13 @@ export function SkipContinueBar({
           </div>
         </div>
 
-        <div 
+        <div
           className="flex flex-row sm:flex-col md:flex-row items-center gap-4"
           role="group"
           aria-label="Skip selection actions"
         >
           <button
-            onClick={handleDeselect}
+            onClick={() => setSelectedItem(null)}
             className="inline-block px-6 py-3 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 transition"
             aria-label="Deselect skip and return to selection"
           >

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import type { ISkipData } from "../types.ts";
 import { getSkipItemImage } from "../utils.ts";
+import { useSelectedItem } from "../context/selected-item-context.tsx";
 
 function SkipImage({ size }: { size: number }) {
   const skipSize = `${size} yard skip`;
@@ -36,6 +37,26 @@ function SkipInfo({ item }: { item: ISkipData }) {
         £{item.price_before_vat} + VAT <span className="text-sm text-gray-500"> (£{item.vat})</span>
       </p>
       <div className="flex flex-col items-center gap-1 text-sm mt-2 text-red-500" role="alert"></div>
+      {!item.allowed_on_road && (
+        <li className="flex items-center gap-2 p-2 rounded-md border border-amber-900/30">
+          <img src="/icons/home.svg" className="w-5 h-5 text-amber-400 flex-shrink-0" />
+          <span className="text-sm font-bold text-amber-300">Private property only</span>
+        </li>
+      )}
+      {item.allows_heavy_waste && (
+        <li className="flex items-center gap-2 p-2 rounded-md border border-emerald-900/30">
+          <img src="/icons/leaf.svg" className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+          <span className="text-sm font-bold text-emerald-300">Heavy waste suitable</span>
+        </li>
+      )}
+      {item.per_tonne_cost && (
+        <li className="flex items-center gap-2 p-2 rounded-md border border-red-900/30">
+          <img src="/icons/alert.svg" className="w-5 h-5 text-purple-400 flex-shrink-0" />
+          <span className="text-sm font-bold text-purple-300">
+            £{item.per_tonne_cost}/tonne transfer cost applies
+          </span>
+        </li>
+      )}
     </div>
   );
 }
@@ -127,15 +148,8 @@ function SkipModal({ item, isOpen, onClose }: { item: ISkipData; isOpen: boolean
   );
 }
 
-export function SkipItem({
-  setSelectedItem,
-  selectedItem,
-  item,
-}: {
-  setSelectedItem: (item: ISkipData) => void;
-  selectedItem: ISkipData | null;
-  item: ISkipData;
-}) {
+export function SkipItem({ item }: { item: ISkipData }) {
+  const { selectedItem, setSelectedItem } = useSelectedItem();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isSelected = selectedItem?.id === item.id;
   const skipSize = `${item.size} yard skip`;
@@ -143,7 +157,7 @@ export function SkipItem({
   return (
     <>
       <li
-        role="option"
+        role="item"
         aria-selected={isSelected}
         tabIndex={0}
         className={`group relative flex flex-col p-6 rounded-2xl bg-white border shadow-sm transition-all duration-300 focus-within:ring-4 focus-within:ring-blue-500 hover:shadow-lg hover:scale-[1.02] ${
